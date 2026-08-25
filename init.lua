@@ -12,7 +12,10 @@ require('packer').startup(function(use)
   -- Treesitter for better syntax highlighting
   use {
     'nvim-treesitter/nvim-treesitter',
-    run = ':TSUpdate',
+    branch = 'master',
+    run = function()
+      require('nvim-treesitter.install').update({ with_sync = true })
+    end,
   }
 
   -- LSP and Autocompletion
@@ -33,18 +36,15 @@ require('packer').startup(function(use)
 end)
 
 -- LSP configuration
-local lspconfig = require('lspconfig')
+vim.lsp.config('solargraph', {})
+vim.lsp.enable('solargraph')
 
--- Ruby LSP
-lspconfig.solargraph.setup {}
-
--- JavaScript/React LSP
-lspconfig.ts_ls.setup {
+vim.lsp.config('ts_ls', {
   on_attach = function(client, bufnr)
-    -- Disable formatting in favor of prettier
     client.server_capabilities.document_formatting = false
   end,
-}
+})
+vim.lsp.enable('ts_ls')
 
 -- Use spaces instead of tabs
 vim.opt.expandtab = true
