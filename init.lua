@@ -12,6 +12,7 @@ require('packer').startup(function(use)
   -- Treesitter for better syntax highlighting
   use {
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     run = ':TSUpdate',
   }
 
@@ -33,18 +34,15 @@ require('packer').startup(function(use)
 end)
 
 -- LSP configuration
-local lspconfig = require('lspconfig')
+vim.lsp.config('solargraph', {})
+vim.lsp.enable('solargraph')
 
--- Ruby LSP
-lspconfig.solargraph.setup {}
-
--- JavaScript/React LSP
-lspconfig.ts_ls.setup {
+vim.lsp.config('ts_ls', {
   on_attach = function(client, bufnr)
-    -- Disable formatting in favor of prettier
     client.server_capabilities.document_formatting = false
   end,
-}
+})
+vim.lsp.enable('ts_ls')
 
 -- Use spaces instead of tabs
 vim.opt.expandtab = true
@@ -65,11 +63,31 @@ vim.opt.autoindent = true
 vim.opt.number = true
 vim.api.nvim_set_keymap("n", "<leader>nh", ":noh<CR>", { noremap = true, silent = true })
 
--- Treesitter Configuration
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "ruby", "javascript", "tsx" },
-  highlight = { enable = true },
+-- Treesitter configuration
+local treesitter_languages = {
+  "ruby",
+  "javascript",
+  "typescript",
+  "tsx",
+  "markdown",
+  "markdown_inline",
 }
+
+require('nvim-treesitter').install(treesitter_languages)
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = {
+    "ruby",
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "markdown",
+  },
+  callback = function()
+    vim.treesitter.start()
+  end,
+})
 
 -- Keybindings
 vim.api.nvim_set_keymap('n', '<leader>nt', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
